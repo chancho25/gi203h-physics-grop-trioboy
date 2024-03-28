@@ -27,4 +27,5 @@ public class Movement : MonoBehaviour
             controller.Move(moveDir.normalized * speed * Time.deltaTime);
         }
     }
+    
 }
