@@ -4,22 +4,27 @@ using UnityEngine;
 
 public class Movement : MonoBehaviour
 {
-     Rigidbody m_Rigidbody;
-    public float m_Speed = 5f;
+    public CharacterController controller;
+    public Transform cam;
 
-    void Start()
+    public float speed = 6f;
+    public float turnSmoothTime = 0.1f;
+    float turnSmoothVelocity;
+
+    void Update()
     {
-        //Fetch the Rigidbody from the GameObject with this script attached
-        m_Rigidbody = GetComponent<Rigidbody>();
-    }
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        float vertical = Input.GetAxisRaw("Vertical");
+        Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
 
-    void FixedUpdate()
-    {
-        //Store user input as a movement vector
-        Vector3 m_Input = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+        if (direction.magnitude >= 0.1f)
+        {
+            float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
+            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
+            transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
-        //Apply the movement vector to the current position, which is
-        //multiplied by deltaTime and speed for a smooth MovePosition
-        m_Rigidbody.MovePosition(transform.position + m_Input * Time.deltaTime * m_Speed);
+            Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+            controller.Move(moveDir.normalized * speed * Time.deltaTime);
+        }
     }
 }
